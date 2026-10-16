@@ -1,6 +1,6 @@
 # AShareChips.jl 开发与发布候选报告
 
-更新：2026-10-16（Asia/Shanghai）。版本 `0.1.0`、UUID 保持不变。当前是本地发布候选；没有公开上传、触发远程 CI 或提交 Julia General 注册。
+更新：2026-10-16（Asia/Shanghai）。版本 `0.1.0`、UUID 保持不变。当前是公开开发候选，源码已上传到 [3142115360-web/AShareChips.jl](https://github.com/3142115360-web/AShareChips.jl)，首个源码提交为 [`bc9992ea7397ed36503c23c4b45ef9250f114d3c`](https://github.com/3142115360-web/AShareChips.jl/commit/bc9992ea7397ed36503c23c4b45ef9250f114d3c)。该提交的四组远程测试和文档构建均已实际通过；没有提交 Julia General 注册。
 
 ## 已实现
 
@@ -14,7 +14,7 @@
 
 [文件对照流程](docs/src/workflow.md) · [参考文件](docs/src/reference.md) · [事件文件](docs/src/adjustments.md) · [人工审查地图](docs/src/review.md)
 
-运行只依赖 Dates 标准库；Aqua、Test、TOML 为测试依赖。源码、测试、文档、MIT 许可证、四平台/版本组合测试配置、文档构建配置和 TagBot 配置齐备。本地 Git 使用 main 分支，尚无远程地址；提交作者尚未配置，因此没有推测姓名或邮箱，也尚未创建发布提交。
+运行只依赖 Dates 标准库；Aqua、Test、TOML 为测试依赖。源码、测试、文档、MIT 许可证、四平台/版本组合测试配置、文档构建配置和 TagBot 配置齐备。公开仓库的默认分支为 main；发布源码提交不等于正式注册或发行标签。本地原始工作副本的 Git 作者尚未配置，未推测姓名或邮箱。
 
 ## 最终实际验证
 
@@ -33,7 +33,22 @@ macOS arm64，隔离 Julia 运行时与缓存；官方二进制 SHA-256 校验�
 
 本次源可执行行覆盖约 **99.7%**，精确计数见并列验证目录的 `coverage-summary.json`。这是行覆盖，非分支覆盖或金融准确率。两个逆 CDF 的舍入兜底路径未覆盖。
 
-Documenter 1.19.0 在 Julia 1.10.12 上通过 doctest、导出 API 文档完整性、交叉引用及 HTML 构建。没有远程仓库 URL，所以保留一条仓库导航链接提示。YAML 静态解析不代表远程工作流已经运行。
+Documenter 1.19.0 在 Julia 1.10.12 上通过 doctest、导出 API 文档完整性、交叉引用及 HTML 构建。这次本地构建发生在公开仓库建立前，保留一条缺少仓库导航链接的提示。YAML 静态解析不代表远程工作流通过。
+
+公开初始源码提交的 [远程测试 #38908788577](https://github.com/3142115360-web/AShareChips.jl/actions/runs/38908788577) 和 [文档构建 #38908788411](https://github.com/3142115360-web/AShareChips.jl/actions/runs/38908788411) 均返回 success，已核验实际日志和覆盖文件：
+
+| 远程环境 | 测试结果 | 源可执行行覆盖 |
+|:---|:---|:---|
+| Linux，Julia 1.10.12 | **1,124/1,124** | 691/693，99.71% |
+| Linux，Julia 1.13.2 | **1,125/1,125** | 682/684，99.71% |
+| Windows，Julia 1.13.2 | **1,121/1,121** | 682/684，99.71% |
+| macOS arm64，Julia 1.13.2 | **1,125/1,125** | 682/684，99.71% |
+
+Windows 的四项 Unix 符号链接用例按平台条件不执行，其他检查没有关闭。远程 Documenter 1.19.0 在 Julia 1.13.2 上通过 doctest、导出 API 文档完整性、交叉引用和 HTML 构建；HTML 已保存为可下载 artifact，没有部署托管站点。初始构建仍有仓库导航链接提示，后续文档配置已补上明确仓库地址。
+
+本地 Julia 1.13.1 从公开仓库按完整初始提交 SHA 安装成功；下载到的全部 53 个包文件与上传字节一致，均匀模型的独立解析冒烟验证通过。此检查证明该公开提交可取得、安装和导入，不代表已通过注册后的 General 安装。
+
+初始远程结果只对应上述初始提交。本次后续修改更新公开状态、安装说明和文档仓库导航；核心源码、测试、Project.toml 和工作流没有变动。后续文档提交的远程运行证据另行保存，避免将初始成功结果当成后续提交的验证。
 
 ## 本轮发现并修复的问题
 
@@ -53,7 +68,7 @@ Documenter 1.19.0 在 Julia 1.10.12 上通过 doctest、导出 API 文档完整�
 ## 发布与研究还缺什么
 
 - **人类维护者理解并手动审核代码**：General 的 AI 辅助政策要求这一责任；README 已披露，目前没有人工签署。审查地图指出关键合同、文件和判断问题。
-- **公开上传和远程测试**：本地候选已准备，但还未建立远程仓库、执行真正的 Linux/Windows/macOS CI、配置权限或部署文档。
+- **托管文档与发布流程**：公开初始提交的 Linux/Windows/macOS 测试及文档构建已通过，HTML 可下载。托管站点、正式发行标签和注册后的 TagBot 运行尚未验证。
 - **General 注册**：此前官方 AutoMerge 名称检查通过固定 2026-10-15 快照；不保留包名，正式发布时再核查。Registrator、社区审核和 TagBot 验证尚未执行。
 - **合法真实数据与通达信对照**：内置数据和新输出全部是合成样本。没有精确兼容、真实账户还原或交易有效性结论。真实对照并非另一个 General 硬门槛，但金融研究结论必须有独立证据。
 - 行情 API、通用带引号 CSV、交易所日历、多证券批量、持仓绝对数量、配股/流通盘变化及策略不在本版实现范围。
@@ -68,5 +83,14 @@ Documenter 1.19.0 在 Julia 1.10.12 上通过 doctest、导出 API 文档完整�
 julia --project=. -e 'using Pkg; Pkg.test()'
 julia --project=. examples/analyze_csv.jl examples/analysis.toml
 ```
+
+尚未注册的开发版也可通过 Julia 的包管理器安装：
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/3142115360-web/AShareChips.jl", rev="main")
+```
+
+以上 `main` 指向可更新的开发分支；复现实验请将 `rev` 改为记录的完整提交 SHA。示例文件流程需下载或克隆仓库，并从包根目录运行。
 
 配置示例会生成两份结果；重复运行请改输出名。日期、质量单位和复权基准须由使用者先核实。

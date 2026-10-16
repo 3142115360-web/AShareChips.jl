@@ -8,7 +8,8 @@ makedocs(
     remotes=nothing,
     checkdocs=:exports,
     doctest=true,
-    format=Documenter.HTML(prettyurls=true, edit_link=nothing, size_threshold=400_000),
+    format=Documenter.HTML(prettyurls=true, edit_link=nothing,
+        repolink="https://github.com/3142115360-web/AShareChips.jl", size_threshold=400_000),
     pages=[
         "开始使用" => "index.md",
         "数学模型" => "model.md",

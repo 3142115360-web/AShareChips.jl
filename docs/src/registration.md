@@ -1,7 +1,19 @@
 # Registration readiness
 
 Requirements below were checked against official sources on 2026-10-15.
-This package has not been submitted to General.
+The development candidate is public at
+[3142115360-web/AShareChips.jl](https://github.com/3142115360-web/AShareChips.jl).
+This package has not been submitted to General; human maintainer review remains outstanding.
+
+Before registration, install the development branch by repository URL:
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/3142115360-web/AShareChips.jl", rev="main")
+```
+
+For reproducible research, replace `main` with the full commit SHA used in
+the experiment. A public development branch is not a registered release.
 
 ## General requirements and maintainer responsibilities
 
@@ -45,8 +57,8 @@ Source: [RegistryCI AutoMerge guidelines](https://juliaregistries.github.io/Regi
 - [x] Documentation CI configured to build HTML and execute doctests.
 - [x] Local Pkg.test passed 1,124 assertions on Julia 1.10.12 and 1,125 on Julia 1.13.1; see the development report for logs and limits.
 - [ ] Human maintainer review of algorithms, implementation, tests and license.
-- [ ] Publish a public repository named `AShareChips.jl` and run its CI.
-- [ ] Review coverage results and actual CI logs; workflow files alone do not prove success.
+- [x] Publish a public repository named `AShareChips.jl` and trigger its CI.
+- [x] Review actual CI logs and coverage artifacts for initial public commit `bc9992ea7397ed36503c23c4b45ef9250f114d3c`; all four test jobs and the documentation build passed.
 - [x] Run official name/distance checks against the recorded fixed General snapshot.
 - [ ] Rerun name checks against the release-time registry snapshot.
 - [ ] Select a release commit and confirm version, clean source and documentation.
@@ -54,8 +66,16 @@ Source: [RegistryCI AutoMerge guidelines](https://juliaregistries.github.io/Regi
 - [ ] Resolve registry review, wait for merge, and verify installation through General.
 - [ ] Configure repository Actions permissions and verify TagBot after registration.
 
-Actual local test results belong in the development report. No remote CI,
-full registration PR check or registry installation of AShareChips has been performed here.
+Actual local test results belong in the development report. Initial public
+commit `bc9992ea7397ed36503c23c4b45ef9250f114d3c` passed
+[all four remote test jobs](https://github.com/3142115360-web/AShareChips.jl/actions/runs/38908788577)
+and [the documentation build](https://github.com/3142115360-web/AShareChips.jl/actions/runs/38908788411).
+Counts, platform differences, coverage and public-URL installation evidence
+are recorded in the [development report](https://github.com/3142115360-web/AShareChips.jl/blob/main/DEVELOPMENT_REPORT.md).
+Documentation HTML is downloadable from the workflow artifact; no hosted
+documentation site has been deployed. Later documentation-only commit
+validation is recorded separately from the initial result.
+No full registration PR check or registry installation of AShareChips has been performed here.
 Real-market comparison, data licensing and model validation also require
 separate evidence; registration does not certify financial accuracy.
 

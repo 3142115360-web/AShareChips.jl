@@ -2,11 +2,21 @@
 
 A 股筹码成本分布的可扩展 Julia 研究模型。将日成交成本分布与历史筹码按有效换手率混合，输出平均成本、获利比例、成本分位数、集中度和历史快照；估计成本分布，不还原账户真实持仓。
 
-**本地开发版 `0.1.0`，尚未注册 General。** 支持 Julia 1.10 及以上的 1.x 版本；运行只依赖标准库 Dates，没有第三方运行依赖。测试使用 Aqua 质量检查。通达信等软件是对照目标，当前没有实测等价结论。
+**公开开发候选版 `0.1.0`，尚未注册 General。** 支持 Julia 1.10 及以上的 1.x 版本；运行只依赖标准库 Dates，没有第三方运行依赖。测试使用 Aqua 质量检查。通达信等软件是对照目标，当前没有实测等价结论。
+
+源码已公开在 [3142115360-web/AShareChips.jl](https://github.com/3142115360-web/AShareChips.jl)。可直接按仓库地址安装开发版：
+
+```julia
+using Pkg
+Pkg.add(url="https://github.com/3142115360-web/AShareChips.jl", rev="main")
+using AShareChips
+```
+
+`main` 会随开发更新；需要复现实验时请固定所用提交。初始公开提交的 Linux、Windows、macOS 测试及文档构建已实际通过，详见 [开发报告](DEVELOPMENT_REPORT.md) 与 [Actions](https://github.com/3142115360-web/AShareChips.jl/actions)。文档 HTML 可从对应运行下载，目前没有托管站点。正式注册须先完成维护者人工审查。
 
 ## 从行情文件开始
 
-仓库自带一个明确标注为合成数据的表格，可直接试运行：
+下载或克隆仓库后，在包根目录运行以下示例；自带表格明确标注为合成数据：
 
 ```julia
 using Pkg

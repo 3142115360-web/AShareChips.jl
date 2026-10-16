@@ -113,7 +113,7 @@ in an independent environment after adding `RegistryCI`, `AutoMerge` and
 `RegistryInstances` and supplying a current General registry path.
 
 Local quality and name checks cover only part of publication readiness. The
-development source is now public; the [development report](../../DEVELOPMENT_REPORT.md)
+development source is now public; the [development report](https://github.com/3142115360-web/AShareChips.jl/blob/main/DEVELOPMENT_REPORT.md)
 records the actual remote runs. Selecting a release commit, human maintainer
 review, Registrator submission and General review remain separate steps. General's
 [requirements and LLM policy](https://github.com/JuliaRegistries/General/blob/master/README.md)

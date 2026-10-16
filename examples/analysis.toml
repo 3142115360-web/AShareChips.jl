@@ -1,0 +1,26 @@
+# All dates/prices/security codes in this input fixture are synthetic.
+input = "fixtures/daily_synthetic.csv"
+output = "analysis-result.csv"
+turnover_unit = "percent"
+price_basis = "unadjusted"
+turnover_basis = "float_shares"
+
+[grid]
+lower = 8.0
+upper = 14.0
+step = 0.02
+
+[model]
+peak = "typical"
+turnover_k = 1.0
+
+[report]
+coverage = 0.9
+
+# Optional supplied reference. This fixture is handmade synthetic data.
+[comparison]
+input = "fixtures/reference_synthetic.csv"
+output = "comparison-result.csv"
+price_basis = "unadjusted"
+mass_unit = "fraction"
+matching = "intersection"

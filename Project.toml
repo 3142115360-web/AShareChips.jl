@@ -1,0 +1,22 @@
+name = "AShareChips"
+uuid = "9e860214-f2ad-4555-bfb7-966779f9bcb1"
+authors = ["AShareChips.jl contributors"]
+version = "0.1.0"
+
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[compat]
+julia = "1.10"
+Dates = "1"
+Test = "1"
+Aqua = "0.8"
+TOML = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+
+[targets]
+test = ["Test", "Aqua", "TOML"]

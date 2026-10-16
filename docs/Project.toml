@@ -1,0 +1,8 @@
+[deps]
+AShareChips = "9e860214-f2ad-4555-bfb7-966779f9bcb1"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+
+[compat]
+AShareChips = "0.1"
+Documenter = "1"
+julia = "1.10"

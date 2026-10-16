@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            julia-version: '1.10'
+          - os: ubuntu-latest
+            julia-version: '1'
+          - os: windows-latest
+            julia-version: '1'
+          - os: macos-latest
+            julia-version: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v3
+        with:
+          delete-old-caches: 'false'
+      - uses: julia-actions/julia-runtest@v1
+        with:
+          coverage: 'true'
+          check_bounds: 'yes'
+      - name: Preserve coverage files
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.julia-version }}
+          path: src/**/*.cov
+          if-no-files-found: ignore
+          retention-days: 30

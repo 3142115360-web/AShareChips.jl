@@ -1,0 +1,22 @@
+# Package source is shared; resolved development environments are local.
+Manifest.toml
+Manifest-v*.toml
+docs/Manifest.toml
+docs/Manifest-v*.toml
+docs/build/
+
+# Julia test and coverage output.
+*.cov
+*.mem
+*.jl.cov
+coverage/
+
+# Local scratch, editor and operating-system files.
+work/
+.DS_Store
+.vscode/
+.idea/
+
+# Generated example report.
+examples/analysis-result.csv
+examples/comparison-result.csv

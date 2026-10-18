@@ -1,9 +1,10 @@
 # Registration readiness
 
-Requirements below were checked against official sources on 2026-10-15.
+Requirements below were rechecked against official sources on 2026-10-18.
 The development candidate is public at
 [3142115360-web/AShareChips.jl](https://github.com/3142115360-web/AShareChips.jl).
-This package has not been submitted to General; human maintainer review remains outstanding.
+Registration is being prepared. The user confirmed on 2026-10-18 that a human
+maintainer had manually reviewed and understood all generated code.
 
 Before registration, install the development branch by repository URL:
 
@@ -27,8 +28,9 @@ quality practices, not all independent AutoMerge gates.
 General explicitly permits LLM-assisted development, but a human maintainer
 must manually review and understand the generated code. Substantial AI
 contributions should be disclosed in the README. This implementation is
-AI-assisted; human review remains outstanding. An automated code review does
-not satisfy that responsibility.
+AI-assisted. The user confirmed the human review and understanding on
+2026-10-18. An automated code review does not satisfy that responsibility;
+future changes also require maintainer review.
 
 Source: [General README and LLM policy](https://github.com/JuliaRegistries/General/blob/master/README.md).
 
@@ -56,11 +58,11 @@ Source: [RegistryCI AutoMerge guidelines](https://juliaregistries.github.io/Regi
 - [x] CI configured to retain raw Julia coverage files for 30 days.
 - [x] Documentation CI configured to build HTML and execute doctests.
 - [x] Local Pkg.test passed 1,422 assertions on Julia 1.10.12 and 1,423 on Julia 1.13.1; see the development report for logs and limits.
-- [ ] Human maintainer review of algorithms, implementation, tests and license.
+- [x] Human maintainer manual review and understanding of all generated code, confirmed by the user on 2026-10-18.
 - [x] Publish a public repository named `AShareChips.jl` and trigger its CI.
-- [x] Review actual CI logs and coverage artifacts for initial public commit `bc9992ea7397ed36503c23c4b45ef9250f114d3c`; all four test jobs and the documentation build passed.
+- [x] Review actual CI logs and coverage artifacts for merged main commit `f8624b2312d352c270079fb84cefaa4963aaaf36`; all four test jobs and the documentation build passed.
 - [x] Run official name/distance checks against the recorded fixed General snapshot.
-- [ ] Rerun name checks against the release-time registry snapshot.
+- [x] Rerun official name checks against the 2026-10-18 General snapshot `1b5fd14672b1533feabe49f15ff7f50b3f0a3a0a`; no name/UUID collision and all default distance checks passed.
 - [ ] Select a release commit and confirm version, clean source and documentation.
 - [ ] Install/configure Registrator and request registration.
 - [ ] Resolve registry review, wait for merge, and verify installation through General.

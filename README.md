@@ -12,7 +12,7 @@ Pkg.add(url="https://github.com/3142115360-web/AShareChips.jl", rev="main")
 using AShareChips
 ```
 
-`main` 会随开发更新；需要复现实验时请固定所用提交。初始公开提交的 Linux、Windows、macOS 测试及文档构建已实际通过，详见 [开发报告](DEVELOPMENT_REPORT.md) 与 [Actions](https://github.com/3142115360-web/AShareChips.jl/actions)。文档 HTML 可从对应运行下载，目前没有托管站点。正式注册须先完成维护者人工审查。
+`main` 会随开发更新；需要复现实验时请固定所用提交。Linux、Windows、macOS 测试及文档构建已实际通过，详见 [开发报告](DEVELOPMENT_REPORT.md) 与 [Actions](https://github.com/3142115360-web/AShareChips.jl/actions)。文档 HTML 可从对应运行下载，目前没有托管站点。
 
 ## 从行情文件开始
 
@@ -77,6 +77,6 @@ julia --project=. benchmarks/runbenchmarks.jl
 
 [实际验证与待办](DEVELOPMENT_REPORT.md) · [人工审查地图](docs/src/review.md) · [同类包调研](docs/src/ecosystem.md) · [名称与质量实测](docs/src/quality.md) · [注册要求](docs/src/registration.md)
 
-本版代码、测试和文档包含 Codex 的实质性 AI 辅助贡献；已做自动验证与独立代理审查，人工维护者对全部代码的理解和手动审查尚未完成。正式注册前须完成该工作，见 [General 的 LLM 政策](https://github.com/JuliaRegistries/General#is-there-any-policy-regarding-the-use-of-llms-in-registered-packages)。
+本版代码、测试和文档包含 Codex 的实质性 AI 辅助贡献。用户于 2026-10-18 确认，真人维护者已手动审阅并理解全部生成代码；该确认与自动验证、代理审查分别记录。后续修改仍须维护者审阅，见 [General 的 LLM 政策](https://github.com/JuliaRegistries/General#is-there-any-policy-regarding-the-use-of-llms-in-registered-packages)。
 
 MIT license。没有嵌入真实行情、访问令牌或其他项目的复制实现。

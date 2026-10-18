@@ -1,8 +1,8 @@
 # Local quality and name checks
 
-The final Aqua checks below were performed locally on 2026-10-16,
-Asia/Shanghai; the package-name checks retain their 2026-10-15 fixed snapshot
-and results. They are release preparation evidence. They do not establish
+The Aqua checks and initial name checks below retain their dated evidence;
+the latest release-preparation name check is recorded separately at the end.
+They do not establish
 General approval, remote CI success, or agreement with a market-data provider
 or trading application.
 
@@ -114,7 +114,28 @@ in an independent environment after adding `RegistryCI`, `AutoMerge` and
 
 Local quality and name checks cover only part of publication readiness. The
 development source is now public; the [development report](https://github.com/3142115360-web/AShareChips.jl/blob/main/DEVELOPMENT_REPORT.md)
-records the actual remote runs. Selecting a release commit, human maintainer
-review, Registrator submission and General review remain separate steps. General's
+records the actual remote runs. Human maintainer review was confirmed by the
+user on 2026-10-18. Selecting a release commit, Registrator submission and
+General review remain separate steps. General's
 [requirements and LLM policy](https://github.com/JuliaRegistries/General/blob/master/README.md)
 require a human maintainer to understand and manually review AI-assisted code.
+
+## Release-preparation name recheck (2026-10-18)
+
+The official checks were rerun against General commit
+[`1b5fd14672b1533feabe49f15ff7f50b3f0a3a0a`](https://github.com/JuliaRegistries/General/commit/1b5fd14672b1533feabe49f15ff7f50b3f0a3a0a),
+with tree `884041d15038573e205739c11e39ab405d16a60d`. Its Registry.toml
+SHA-256 was `52cfb4843b19e0b27c9b2adb6ba79aec8c67f9832022d6acc053ee9d2756efa0`.
+It contained 14,574 packages including JLLs and 12,698 non-JLL packages.
+
+AutoMerge 1.1.1 was still the latest registered version in that snapshot.
+All five basic name checks, the exact collision check and the default distance
+check returned `(true, "")`. The package UUID was unused. The closest edit
+distance remained 6, so there were no candidates in the official visual gate.
+The actual run exited 0. An initial run lacked OpenSSL_jll in the selected
+cache; the successful retry used an existing complete cache without disabling
+checks. The isolated local evidence is retained under
+`work/registration-preflight/`; it is not a package dependency.
+
+This result does not reserve a name or establish General approval. The latest
+merged implementation's remote test results are in the development report.

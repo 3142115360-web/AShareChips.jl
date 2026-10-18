@@ -44,6 +44,16 @@ julia --project=. examples/analyze_csv.jl examples/analysis.toml
 
 结果包含日期、证券、平均成本、收盘价下的获利比例、成本分位数和区间宽度。脚本拒绝覆盖已有文件、目录或链接，并逐文件以临时文件安全发布；重新运行时请换输出文件名。[完整流程](docs/src/workflow.md)也支持导入明确的除权事件。
 
+## 指标摘要对照
+
+只取得成本分位数、平均成本或获利比例时，可直接用 `compare_metrics` 比较，无需补造完整筹码分布。中位成本与加权平均成本分别处理，比例/百分数和评价价格显式声明。[摘要接口与 CSV 流程](docs/src/metric_comparison.md)提供合成示例：
+
+```sh
+julia --project=. examples/compare_metrics_csv.jl examples/metrics-analysis.toml
+```
+
+已用真实日行情完成 90 日公开算法对照，存在可测量偏差；方法、初始化、网格、除权限制见[真实对照报告](docs/src/market_validation.md)。尚未完成通达信软件验收。
+
 ## 研究模型与对照
 
 递推为 `C_t = (1-α_t) C_(t-1) + α_t D_t`。提供均匀、三角、逐笔量加权模型，以及线性/指数有效换手模型；可继承抽象类型替换。`chip_history` 返回历史状态；`dated_history` 同时保留日期。`compare_distributions` 比较不同网格的完整 CDF、Wasserstein 距离和指标偏差；`grid_convergence` 检查网格敏感性。`read_distributions` 导入参考直方图；`read_adjustments` 对齐事件；`compare_history` 按证券、日期和价格基准比较历史。

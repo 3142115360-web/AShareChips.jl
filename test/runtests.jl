@@ -385,7 +385,9 @@ include("validation.jl")
 include("reference.jl")
 include("adjustments.jl")
 include("history_comparison.jl")
+include("metric_comparison.jl")
 include("cli.jl")
+include("metric_cli.jl")
 include("review_regressions.jl")
 
 @testset "Aqua package quality" begin

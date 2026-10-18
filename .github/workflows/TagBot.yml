@@ -5,8 +5,10 @@ on:
     types: [created]
   workflow_dispatch:
 
-# The upstream TagBot template uses repository-default token permissions.
-# Configure Actions permissions after creating the remote repository.
+# TagBot needs write access to create tags/releases after registry acceptance.
+# Test and documentation workflows retain their read-only tokens.
+permissions:
+  contents: write
 jobs:
   TagBot:
     if: github.event_name == 'workflow_dispatch' || github.actor == 'JuliaTagBot'

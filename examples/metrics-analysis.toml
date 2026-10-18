@@ -1,0 +1,32 @@
+# All input prices, symbols, dates and reference metrics are synthetic.
+input = "fixtures/daily_synthetic.csv"
+output = "metrics-result.csv"
+turnover_unit = "percent"
+price_basis = "unadjusted"
+turnover_basis = "float_shares"
+
+[grid]
+lower = 8.0
+upper = 14.0
+step = 0.02
+
+[model]
+kind = "triangular"
+peak = "typical"
+turnover_model = "linear"
+turnover_k = 1.0
+
+[reference]
+input = "fixtures/metrics_synthetic.csv"
+price_basis = "unadjusted"
+profit_unit = "percent"
+matching = "intersection"
+quantiles = [0.5]
+quantile_columns = ["cost_q50"]
+
+[reference.columns]
+date = "date"
+symbol = "symbol"
+mean_cost = "mean_cost"
+profit_price = "profit_price"
+profit_ratio = "profit_ratio"

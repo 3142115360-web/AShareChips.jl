@@ -19,6 +19,8 @@ makedocs(
         "参考筹码文件" => "reference.md",
         "除权事件文件" => "adjustments.md",
         "文件对照流程" => "workflow.md",
+        "指标摘要对照" => "metric_comparison.md",
+        "真实行情模型对照" => "market_validation.md",
         "人工审查地图" => "review.md",
         "计算性能" => "performance.md",
         "API" => "api.md",

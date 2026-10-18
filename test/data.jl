@@ -24,12 +24,16 @@ using Dates
 
         one_bar = [DailyBar(low=8, high=10, close=9, turnover=0.05)]
         for price_basis in (:unadjusted, :fixed_adjusted),
-            turnover_basis in (:float_shares, :free_float_shares, :total_shares)
+            turnover_basis in (:float_shares, :free_float_shares, :total_shares, :provider_reported)
             one = BarSeries([Date(2000, 1, 3)], one_bar; price_basis, turnover_basis)
             @test one.symbol === nothing
             @test one.price_basis == price_basis
             @test one.turnover_basis == turnover_basis
         end
+        provider = read_bars(IOBuffer("date,low,high,close,turnover\n2000-01-03,8,10,9,5\n");
+            price_basis=:unadjusted, turnover_basis=:provider_reported, turnover_unit=:percent)
+        @test provider.turnover_basis == :provider_reported
+        @test provider.bars[1].turnover == 0.05
         @test_throws UndefKeywordError BarSeries([Date(2000, 1, 3)], one_bar;
                                                turnover_basis=:float_shares)
         @test_throws UndefKeywordError BarSeries([Date(2000, 1, 3)], one_bar;

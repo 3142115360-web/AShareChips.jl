@@ -1,11 +1,11 @@
 const _PRICE_BASES = (:unadjusted, :fixed_adjusted)
-const _TURNOVER_BASES = (:float_shares, :free_float_shares, :total_shares)
+const _TURNOVER_BASES = (:float_shares, :free_float_shares, :total_shares, :provider_reported)
 
 function _validate_bases(price_basis, turnover_basis)
     price_basis isa Symbol && price_basis in _PRICE_BASES ||
         throw(ArgumentError("price_basis must be :unadjusted or :fixed_adjusted"))
     turnover_basis isa Symbol && turnover_basis in _TURNOVER_BASES ||
-        throw(ArgumentError("turnover_basis must be :float_shares, :free_float_shares or :total_shares"))
+        throw(ArgumentError("turnover_basis must be :float_shares, :free_float_shares, :total_shares or :provider_reported"))
     return nothing
 end
 
@@ -30,7 +30,10 @@ and suffixes are preserved. Treat the stored vectors as read-only.
 `price_basis` is `:unadjusted` (historical prices on each observation date) or
 `:fixed_adjusted` (all prices already expressed in one fixed coordinate system).
 `turnover_basis` identifies the denominator of the supplied fractions:
-`:float_shares`, `:free_float_shares` or `:total_shares`. These labels record the
+`:float_shares`, `:free_float_shares` or `:total_shares`. Explicit
+`:provider_reported` records a supplied turnover whose share denominator has
+not been independently established; it does not assert any of the other bases.
+These labels record the
 caller's assertion; the package cannot verify a provider's adjustment factors,
 calendar or denominator. Fixed-adjusted series reject nonidentity adjustments.
 """

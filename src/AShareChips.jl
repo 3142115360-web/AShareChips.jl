@@ -10,7 +10,7 @@ export PriceGrid, ChipDistribution, DailyBar, AbstractDailyModel,
        bin_edges, price_centers, probabilities, average_cost, profit_ratio,
        cost_quantile, concentration,
        BarSeries, trade_dates, read_bars, dated_history,
-       compare_distributions, grid_convergence,
+       compare_distributions, grid_convergence, compare_metrics,
        ReferenceSeries, read_distributions, read_adjustments, compare_history
 
 include("types.jl")
@@ -21,6 +21,7 @@ include("data.jl")
 include("reference.jl")
 include("adjustments.jl")
 include("validation.jl")
+include("metric_comparison.jl")
 include("history_comparison.jl")
 
 end

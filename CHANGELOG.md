@@ -8,8 +8,8 @@
 - Histogram mean, profit CDF, inverse CDF and equal-tail concentration.
 - Synthetic analytical/regression tests, documentation and CI workflows.
 
-Not yet registered. Proprietary software comparison and real-market validation
-remain future work; no trading signals are included.
+Not yet registered. Proprietary terminal parity, broader real-market validation
+and corporate-action validation remain future work; no trading signals are included.
 
 ### Continued release preparation
 
@@ -29,3 +29,11 @@ remain future work; no trading signals are included.
 - Stable CDF/survival differences plus exact-rational fallback for rare tiny mass.
 - Non-overwriting report publication and writer-failure cleanup.
 - Chinese human-maintainer review map and independent numerical oracle checks.
+
+### Scalar reference comparisons
+
+- Compare supplied means, quantile costs and profit summaries with explicit units and evaluation prices.
+- Strict dated CSV example with complete-history simulation, missing-date reporting and non-overwriting output.
+- Explicit `provider_reported` turnover basis for an unverified source denominator.
+- Independent scalar oracles and actual public-market model comparison; no terminal parity claim.
+- Narrow TagBot contents-write permission, leaving test/documentation tokens read-only.

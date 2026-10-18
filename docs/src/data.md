@@ -28,6 +28,7 @@ chips = chip_distribution(series; grid)
 | `turnover_basis` | `:float_shares` | 流通股作为换手分母 |
 | `turnover_basis` | `:free_float_shares` | 自由流通股作为换手分母 |
 | `turnover_basis` | `:total_shares` | 总股本作为换手分母 |
+| `turnover_basis` | `:provider_reported` | 使用供应商报告的换手率，分母尚未独立核实；不等同于前三种口径 |
 
 `DailyBar.turnover` 始终存储比例：`0.05` 表示 5%，允许大于 1。切换分母只更改元数据，不会重新计算换手率。请在上游根据证券、日期和供应商定义准备一致数据。
 

@@ -55,7 +55,7 @@ Source: [RegistryCI AutoMerge guidelines](https://juliaregistries.github.io/Regi
 - [x] Test CI configured for Julia 1.10 and latest stable on Linux, and latest stable on Windows/macOS.
 - [x] CI configured to retain raw Julia coverage files for 30 days.
 - [x] Documentation CI configured to build HTML and execute doctests.
-- [x] Local Pkg.test passed 1,124 assertions on Julia 1.10.12 and 1,125 on Julia 1.13.1; see the development report for logs and limits.
+- [x] Local Pkg.test passed 1,422 assertions on Julia 1.10.12 and 1,423 on Julia 1.13.1; see the development report for logs and limits.
 - [ ] Human maintainer review of algorithms, implementation, tests and license.
 - [x] Publish a public repository named `AShareChips.jl` and trigger its CI.
 - [x] Review actual CI logs and coverage artifacts for initial public commit `bc9992ea7397ed36503c23c4b45ef9250f114d3c`; all four test jobs and the documentation build passed.
@@ -64,7 +64,8 @@ Source: [RegistryCI AutoMerge guidelines](https://juliaregistries.github.io/Regi
 - [ ] Select a release commit and confirm version, clean source and documentation.
 - [ ] Install/configure Registrator and request registration.
 - [ ] Resolve registry review, wait for merge, and verify installation through General.
-- [ ] Configure repository Actions permissions and verify TagBot after registration.
+- [x] Give TagBot a narrow contents-write token; CI/Docs remain contents-read.
+- [ ] Verify TagBot after registration.
 
 Actual local test results belong in the development report. Initial public
 commit `bc9992ea7397ed36503c23c4b45ef9250f114d3c` passed
@@ -91,7 +92,7 @@ Source: [Registrator instructions](https://github.com/JuliaRegistries/Registrato
 
 TagBot creates repository tags/releases after registry merge; it does not
 register the package. The provided workflow uses the upstream pinned example
-and `GITHUB_TOKEN`. Repository Actions permissions need setup. If a release
+and `GITHUB_TOKEN`. This workflow explicitly requests `contents: write`, while test and documentation workflows remain read-only. It has not yet been verified against a registered release. If a release
 commit changes workflow files or tags must trigger documentation deployment,
 review the upstream SSH-key/manual-release guidance first. Hosted documentation
 and deploy keys have not been configured.

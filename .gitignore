@@ -20,3 +20,4 @@ work/
 # Generated example report.
 examples/analysis-result.csv
 examples/comparison-result.csv
+examples/metrics-result.csv

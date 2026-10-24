@@ -1,12 +1,12 @@
 # API
 
 ```@meta
-CurrentModule = AShareChips
+CurrentModule = AShareCostDistributions
 ```
 
 ```@autodocs
-Modules = [AShareChips]
+Modules = [AShareCostDistributions]
 Private = false
 ```
 
-仅导出符号及这里说明的行为属于公共契约。内部字段应视为只读；通过 `bin_edges`、`price_centers`、`probabilities` 获取副本。直接修改字段向量会破坏构造器保证，不受支持。
+Only exported symbols and documented behaviour form the public contract. Treat internal fields as read-only; use `bin_edges`, `price_centers` and `probabilities` to obtain copies. Direct modification of field vectors can break constructor guarantees and is unsupported.

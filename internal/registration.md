@@ -1,5 +1,7 @@
 # Registration readiness
 
+Historical pre-registration record for the former AShareChips name. It is not part of the user documentation; see the current README for status.
+
 Requirements below were rechecked against official sources on 2026-10-18.
 The development candidate is public at
 [3142115360-web/AShareChips.jl](https://github.com/3142115360-web/AShareChips.jl).

@@ -1,5 +1,5 @@
 using Test
-using AShareChips
+using AShareCostDistributions
 using Dates: Date
 
 @testset "Histogram comparisons" begin

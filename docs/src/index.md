@@ -1,9 +1,9 @@
-# AShareChips.jl
+# AShareCostDistributions.jl
 
-以可复现的估计模型研究 A 股筹码成本分布。当前是尚未注册的 `0.1.0` 开发版，只依赖 Dates 标准库；采用 Float64 数值契约。
+AShareCostDistributions.jl is a reproducible research model for estimating holding-cost distributions in Chinese A-share securities. It is a statistical estimate from daily market data, not a reconstruction of account-level positions or a proprietary-terminal clone. Version `0.1.0` uses only the `Dates` standard library at runtime.
 
 ```jldoctest
-julia> using AShareChips
+julia> using AShareCostDistributions
 
 julia> grid = PriceGrid([8, 10, 12]);
 
@@ -22,9 +22,9 @@ julia> profit_ratio(chips, 10)
 0.75
 ```
 
-先阅读[数学模型](model.md)和[数据与除权](assumptions.md)，再接入真实行情。无初始分布时第一天是 seed；示例中的零换手首日仍然完成初始化。
+Read the [model](model.md) and [data/corporate-action assumptions](assumptions.md) before using market data. With no initial distribution, the first day seeds the model; the zero-turnover first bar in this example still initializes that state.
 
-在包根目录构建完整文档：
+Build the complete documentation from the package root:
 
 ```sh
 julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'
@@ -32,6 +32,6 @@ julia --project=docs docs/make.jl
 python3 -m http.server --bind 127.0.0.1 --directory docs/build 8000
 ```
 
-然后在浏览器打开本机 `http://127.0.0.1:8000`。CI 构建文档并保存 HTML artifact；远程托管尚未配置。
+Then open `http://127.0.0.1:8000` locally. Continuous integration builds the site and deploys the development version from `main`.
 
-日期序列、文件接入及逐日结果表见[导入行情文件](data.md)；不同网格与供应商结果的误差比较见[精度与对照](validation.md)。包名及代码质量的实际检查见[发布准备证据](quality.md)。
+For dated series, file input, and per-day result tables see [importing daily data](data.md). For grid sensitivity and comparison against other sources see [validation and comparisons](validation.md).

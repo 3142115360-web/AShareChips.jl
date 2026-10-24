@@ -1,4 +1,4 @@
-using AShareChips
+using AShareCostDistributions
 
 # A reproducible synthetic workload; no real securities or trading claims.
 function runbenchmarks(; days=1000, trials=5)

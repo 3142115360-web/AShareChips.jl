@@ -45,6 +45,17 @@ jobs:
         with:
           coverage: 'true'
           check_bounds: 'yes'
+      - name: Generate source line coverage report
+        if: matrix.os == 'ubuntu-latest' && matrix.julia-version == '1'
+        run: julia --startup-file=no scripts/coverage.jl . coverage-report
+      - name: Preserve coverage report
+        if: matrix.os == 'ubuntu-latest' && matrix.julia-version == '1'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: coverage-report/
+          if-no-files-found: error
+          retention-days: 30
       - name: Preserve coverage files
         if: always()
         uses: actions/upload-artifact@v7

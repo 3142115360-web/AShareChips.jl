@@ -1,24 +1,24 @@
-# 数学模型
+# Mathematical model
 
-## 概率状态与递推
+## Probability state and recurrence
 
-网格边界为 `e₁ < … < e_(B+1)`，非负有限。每个 bin 的概率为 `mᵢ ≥ 0`，总和为 1；bin 内密度固定为 `mᵢ/(e_(i+1)-eᵢ)`。网格不要求等宽，价格维度为元/股或调用者一致选择的单位。
+Grid edges `e₁ < … < e_(B+1)` are finite and nonnegative. Each bin has probability `mᵢ ≥ 0`, with total mass 1 and constant density `mᵢ/(e_(i+1)-eᵢ)` inside the bin. Bins need not have equal widths. Prices use yuan per share, or another unit chosen consistently by the caller.
 
 ```math
 C_t(p)=(1-\alpha_t)C_{t-1}^{\mathrm{adj}}(p)+\alpha_tD_t(p).
 ```
 
-默认线性有效换手 `α=clamp(kτ,0,1)`；指数模型 `α=1-exp(-kτ)`。`τ` 为非负比例，可超过 1；`k` 非负。模型假设各成本价的历史持仓等比例退出，不包含持仓年龄、价格偏好或投资者行为。
+The default linear effective turnover is `α=clamp(kτ,0,1)`; the exponential alternative is `α=1-exp(-kτ)`. Turnover `τ` is a nonnegative fraction and may exceed 1; `k` is nonnegative. The model assumes previous holdings exit proportionally at every cost level. It does not model holding age, price-dependent selling or investor behaviour.
 
-无 `initial` 时 `C₁=D₁`，首日换手不影响 seed。有 `initial` 时首日也按递推更新。初值误差在无调整时的存活权重为 `∏(1-α_t)`；截取很短窗口可能保留显著初值偏差。
+Without `initial`, the first state is `C₁=D₁`, regardless of first-day turnover. With `initial`, the first day also follows the recurrence. Without adjustments, the surviving weight of initialization error is `∏(1-α_t)`. A short observation window can retain substantial initialization bias.
 
-## 当日成本分布
+## Daily cost distributions
 
-- `UniformModel`：在 `[L,H]` 上均匀。
-- `TriangularModel`：边界 `[L,H]`、峰值 `M`，默认 `M=(L+H+close)/3`；可选收盘价或调用者提供的 VWAP。
-- `EmpiricalModel`：按成交量分配逐笔价格的 bin 概率。每一天可以提供不同模型。
+- `UniformModel`: uniform on `[L,H]`.
+- `TriangularModel`: support `[L,H]` and mode `M`. The default is `M=(L+H+close)/3`; alternatives use the close or caller-supplied VWAP.
+- `EmpiricalModel`: allocates bin probabilities from trade prices and volume weights. A different model may be supplied for each day.
 
-非退化三角分布：
+For a nondegenerate triangle with an interior mode:
 
 ```math
 f(p)=\begin{cases}
@@ -28,26 +28,26 @@ f(p)=\begin{cases}
 \end{cases}
 ```
 
-`M=L`、`M=H` 使用单侧极限分布。连续模型的 bin 质量在数学上为 `F(e_(i+1))-F(eᵢ)`；实现通过局部密度积分避免数值抵消，随后仍采用 bin 内均匀近似。`L=H` 和逐笔价格进入包含该价格的 bin；内边界归右 bin，最右边界归最后一个 bin。
+`M=L` and `M=H` use the corresponding one-sided limits. A continuous model's bin mass is mathematically `F(e_(i+1))-F(eᵢ)`. The implementation integrates local density to avoid cancellation, then represents that mass uniformly within the bin. When `L=H`, or for empirical trade prices, mass enters the containing bin. An internal edge belongs to the bin on its right; the final edge belongs to the last bin.
 
-不会截尾。交易范围及正质量的除权后支撑必须完全落入网格，否则报错。网格粗化会影响均值、分位数和获利比例，尤其是一字板、离散成交价格；均匀摊入 bin 不是声称实际在 bin 内有成交。真实账户成本还取决于更久的历史、送配股、税费和卖出选择。
+No support is clipped. All daily trading ranges and all adjusted support with positive mass must fit inside the grid, or an error is raised. Coarse grids affect means, quantiles and profit ratios, particularly for single-price days and discrete trades. Spreading mass uniformly inside a bin does not imply trades occurred throughout it. Actual account costs also depend on earlier history, corporate actions, fees, taxes and which holdings were sold.
 
-## 指标定义
+## Metrics
 
-均值为 `Σ mᵢ(eᵢ+e_(i+1))/2`。获利比例为直方图 CDF `P(cost < price)`；bin 内均匀假设使相等点质量为 0。成本分位数为该 CDF 的广义逆，并在正质量 bin 内线性插值。q=0/1 返回正质量支撑两端，遇到零质量 plateau 时返回左端。
+The mean is `Σ mᵢ(eᵢ+e_(i+1))/2`. The profit ratio is the histogram CDF `P(cost < price)`; under the uniform-within-bin representation, individual points have zero mass. Cost quantiles use the generalized inverse of that CDF, with linear interpolation inside positive-mass bins. `q=0/1` returns the endpoints of the positive-mass support; at a zero-mass plateau, the inverse returns the left endpoint.
 
-集中度返回等尾区间 `lower=Q((1-c)/2)`、`upper=Q((1+c)/2)`、绝对宽度 `upper-lower` 和相对宽度 `(upper-lower)/(upper+lower)`。相对宽度采用比例，乘 100 才是百分数；宽度越大表示越分散。这里不求最短覆盖区间，也没有验证某软件的同名指标定义。
+Concentration reports an equal-tail interval with `lower=Q((1-c)/2)` and `upper=Q((1+c)/2)`, its absolute width `upper-lower`, and its relative width `(upper-lower)/(upper+lower)`. Relative width is a fraction; multiply by 100 for a percentage. Larger widths indicate greater dispersion. This is not a shortest covering interval, and equivalence with similarly named software indicators has not been established.
 
-若极小的 Float64 次正规价格使两个区间端点均舍入到零，集中度会明确报错；常规金融价格不会触及此数值范围。
+If extremely small subnormal Float64 prices cause both interval endpoints to round to zero, concentration raises an explicit error. Ordinary financial prices are far outside this numerical range.
 
-## 扩展与复杂度
+## Extension and complexity
 
-继承 `AbstractDailyModel` 并实现 `daily_distribution`，返回同网格 `ChipDistribution`；继承 `AbstractTurnoverModel` 并实现 `effective_turnover`，返回有限 `[0,1]` 数值。构造器验证非负有限质量并归一化。
+Subtype `AbstractDailyModel` and implement `daily_distribution`, returning a `ChipDistribution` on the same grid. Subtype `AbstractTurnoverModel` and implement `effective_turnover`, returning a finite value in `[0,1]`. Constructors validate finite nonnegative masses and normalize them.
 
-连续日模型、更新和指标为 O(B)。逐笔分箱为 O(K log B)，K 为交易笔数；仿射重分箱通过有序区间扫过重叠 bins。最终分布仅保留 O(B) 数值状态；普通输入向量直接复用，其他迭代输入会收集到内存；默认模型和调整不会再创建逐日列表。历史快照另外需要 O(TB)。v0.1 不承诺零分配、任意精度、GPU 或跨股票批量并行性能。
+Continuous daily models, updates and metrics take O(B) time. Empirical binning takes O(K log B), where K is the number of trades. Affine rebins scan ordered intervals and their overlapping bins. Final-state simulation retains O(B) numerical state. Ordinary input vectors are reused; other input iterators are collected into memory. Default models and adjustments do not allocate per-day lists. Retaining history additionally requires O(TB) storage. Version 0.1 makes no zero-allocation, arbitrary-precision, GPU or parallel multi-security performance guarantee.
 
-## 数值范围与微小尾部
+## Numerical range and tiny tails
 
-连续日模型通过局部密度积分计算 bin 概率，避免相近 CDF 相减抹掉三角尾部。非零值转成 Float64 零、正质量在归一化/重分箱/递推中下溢为零时会明确报错。极长历史窗口可能因此需要调用者显式选择支持窗口或其他精度模型；本包不会自动删除尾部。
+Continuous daily models integrate local densities to preserve triangular tails that could disappear when subtracting nearby CDF values. A nonzero input that converts to Float64 zero, or positive mass that underflows to zero during normalization, rebinning or recurrence, raises an explicit error. Extremely long histories may therefore require the caller to choose an explicit support window or another precision model; the package never drops tails automatically.
 
-普通对照采用 CDF/生存概率的稳定差值。若有正质量小于机器 epsilon，比较与分位数内部使用精确有理数规范化，保留被大累计值遮蔽的微小中间质量和远端尾部；最终仍输出 Float64。这种罕见路径较慢，也不使本包成为任意精度 API。
+Ordinary comparisons use stable differences of CDF or survival probabilities. If a positive mass is smaller than machine epsilon, comparison and quantile calculations internally use exact rational normalization to retain small intermediate masses and distant tails hidden by large cumulative values. Outputs remain Float64. This uncommon path is slower and does not make the public API arbitrary-precision.

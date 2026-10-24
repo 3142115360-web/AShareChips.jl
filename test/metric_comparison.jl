@@ -1,5 +1,5 @@
 using Test
-using AShareChips
+using AShareCostDistributions
 
 @testset "Scalar summary comparison" begin
     asymmetric = ChipDistribution(PriceGrid([1,2,4]), [.75,.25])

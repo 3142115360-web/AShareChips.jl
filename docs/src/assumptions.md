@@ -1,25 +1,25 @@
-# 数据与除权假设
+# Data and corporate-action assumptions
 
-## 输入责任
+## Input responsibilities
 
-本包不下载市场数据，也不使用推测的股票样本。示例与测试均为合成数据。裸 DailyBar 向量由调用者保证单证券、时序和去重；BarSeries 会拒绝重复与乱序日期，并保留证券和研究口径。read_bars 提供简单无引号文件接入，详见[导入行情文件](data.md)。本包仍不会推断交易日历或未来数据污染。
+The package does not download market data or invent stock samples. Included examples and tests use synthetic data. For a plain vector of `DailyBar` values, the caller must ensure a single security, chronological order and no duplicate observations. `BarSeries` rejects duplicate or unordered dates and retains security and research-basis metadata. `read_bars` imports simple unquoted files; see [Importing market data](data.md). The package does not infer trading calendars or detect future information in the input.
 
-`DailyBar` 只需要 low/high/close/turnover，VWAP 可选；open、volume、amount 和流通股本由上游保留并清洗。所有价格必须有限且为正，close/VWAP 位于 `[low,high]`。缺失值、停牌填充值不能伪装成真实成交。
+`DailyBar` requires only low, high, close and turnover; VWAP is optional. Open, volume, amount and tradable share counts must be retained and cleaned upstream. All prices must be finite and positive, and close/VWAP must lie in `[low,high]`. Missing values and suspension placeholders must not be presented as actual trades.
 
-- 换手为比例，`0.05` 表示 5%；不能把数据源的 `5` 直接传入。其分母须与研究对象一致（流通股、自由流通股或总股本不能混用）。若分母尚未独立核实，可显式使用 `turnover_basis=:provider_reported` 记录这一事实，不等同于任一已知股本口径。输入可超过 1，线性模型会饱和，指数模型会渐近 1。
-- 逐笔模型接收非负有限成交量，单位可统一为股或手；归一化只使用相对权重。总量必须为正。每个价格都须在 bar 范围内。
-- 不从日 OHLC 伪造 VWAP。由 amount/volume 计算时先确认金额和成交量单位、成交类型与统计范围，再检查是否位于当天范围。
-- 有初始分布且有效换手为 0 时，状态不变（除权映射仍会先执行）。停牌可以从观测序列中省略；若要保留日期，应在上游保存日期对齐。没有 prior 的零换手首日仍会按模型 seed，不能据此解释为恢复真实持仓。
-- 已有供应商筹码分布可用于 `initial`，但不能把同一时期既作为 prior 又再次更新；必须记录初始时点及价格基准。
+- Turnover is a fraction: `0.05` means 5%. Do not pass a provider's percentage value `5` directly. Use a consistent denominator: tradable float, free float and total shares are different bases. If the denominator has not been independently verified, explicitly record `turnover_basis=:provider_reported`; this does not assert any of those known share-count definitions. Inputs may exceed 1: the linear model saturates and the exponential model approaches 1.
+- Empirical trade models accept finite nonnegative volumes in consistent units, such as shares or lots. Normalization uses relative weights only; total volume must be positive. Every trade price must lie within the bar's range.
+- Do not manufacture VWAP from daily OHLC values. Before calculating it from amount/volume, verify currency and volume units, included trade types and statistical scope, then check the daily range.
+- With an initial distribution and zero effective turnover, the state is unchanged after any cost adjustment has been applied. Suspensions may be omitted from the observation sequence; preserve calendar alignment upstream if needed. A zero-turnover first day without a prior still seeds the model and cannot be interpreted as recovered actual holdings.
+- A provider's cost distribution can serve as `initial`, but its covered period must not also be processed again as updates. Record the prior's date and price basis.
 
-## 价格基准与事件
+## Price coordinates and events
 
-两条可选研究流程，调用者需选定并记录：
+Choose and record one of these workflows:
 
-1. 全部历史输入和 prior 已处于同一固定复权基准：使用默认 identity adjustments，避免重复调整。若该基准依赖未来事件，回测必须评估是否引入前视信息。
-2. 输入为逐日当时的价格：显式提供 `PriceAdjustment(scale=s, shift=b)`，在事件日将昨日历史成本映射为 `p'=s*p+b`，当天数据已经属于新基准。调用者负责根据合法数据与研究定义确定 s/b，不能仅凭股价跳空推断。
+1. All historical inputs and the prior already share a fixed adjusted price basis. Use the default identity adjustments to avoid adjusting twice. If the chosen basis depends on future events, assess look-ahead information when backtesting.
+2. Inputs use each day's contemporaneous prices. Supply explicit `PriceAdjustment(scale=s, shift=b)` values to map previous costs to `p'=s*p+b` on event days; that day's observations already use the new basis. Derive `s` and `b` from legitimate source data and a declared research definition, rather than inferring them from price gaps.
 
-2:1 拆分的坐标示例：`scale=0.5`。这只是成本坐标与概率质量的变换。现金分红是否扣减成本、配股认购/送股、流通股增加、新老持仓混合均需额外模型；本版不能仅靠一个 scale/shift 精确处理所有公司行为，也不维护绝对股票数量。
+For a 2:1 split, `scale=0.5` illustrates the coordinate change. It transforms cost coordinates and probability mass only. Dividend cost treatment, rights subscriptions, bonus shares, changes in tradable float and mixtures of existing and new holdings need additional modelling. A single scale/shift cannot exactly represent all corporate actions, and this version does not track absolute share counts.
 
 ```julia
 prior = ChipDistribution(PriceGrid([4, 5, 6, 8, 10, 12]), [0, 0, 0, 0, 1])
@@ -29,10 +29,10 @@ chips = chip_distribution([bar]; grid=prior.grid, initial=prior,
 @assert average_cost(chips) ≈ average_cost(prior)/2
 ```
 
-仿射变换先保持原 bin 均匀密度，再按重叠长度分配到目标 bin。目标须覆盖正质量支撑，禁止负价格、数值塌缩和截尾。反复重分箱会增加离散化误差；建议进行网格收敛测试。有 prior 时每天先调整再换手；无 prior 时第一天不能有非 identity adjustment。
+An affine transformation preserves the original bin's uniform density and distributes mass to target bins by overlap length. The target grid must cover all positive-mass support. Negative prices, numerical collapse and clipping are rejected. Repeated rebins introduce discretization error; assess grid convergence. With a prior, adjustment precedes turnover every day. Without a prior, the first day's adjustment must be identity.
 
-## 兼容与对照
+## Compatibility and comparison
 
-当前提供可组合的数学部件，没有未经验证的 `TongDaXin` 预设。计划对照时须固定证券、日期范围、初始窗口、复权因子、换手分母、价格精度、成交模型和指标定义，分别比较完整 CDF、成本分位数和获利比例。商业算法未公开时，只能报告特定数据上的偏差，不能宣称恢复内部实现。
+The package provides composable mathematical components and no unverified `TongDaXin` preset. Comparisons must fix the security, dates, initialization window, adjustment factors, turnover denominator, price precision, daily distribution and metric definitions. Compare the full CDF, cost quantiles and profit ratios separately. If a commercial algorithm is unpublished, report discrepancies on the specific data without claiming recovery of its implementation.
 
-市场数据/API 输出的使用和再分发权由调用者确认。仓库目前只含合成数据，不嵌入第三方项目代码。已完成一份真实日行情上的独立公开算法对照，见[实验报告](market_validation.md)；仍未完成通达信客户端验收、跨除权或多来源验证。
+Callers must verify rights to use and redistribute market data and API outputs. The repository contains only synthetic data and does not embed third-party project code. A completed comparison against a public algorithm on real daily bars is described in the [experiment report](market_validation.md). Tongdaxin client acceptance, corporate-action validation and multi-source validation remain outstanding.

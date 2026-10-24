@@ -1,4 +1,4 @@
-using AShareChips
+using AShareCostDistributions
 using Dates
 
 # Every value and date in this fixture is synthetic, not a market observation.

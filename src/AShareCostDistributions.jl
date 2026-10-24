@@ -1,4 +1,4 @@
-module AShareChips
+module AShareCostDistributions
 
 using Dates: Date, DateFormat, @dateformat_str
 import Dates

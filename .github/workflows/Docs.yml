@@ -1,11 +1,14 @@
 name: Documentation
+
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,9 +27,50 @@ jobs:
         run: julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'
       - name: Build documentation and run doctests
         run: julia --project=docs docs/make.jl
-      - uses: actions/upload-artifact@v7
+      - name: Test for published coverage report
+        run: julia --project=. --check-bounds=yes -e 'using Pkg; Pkg.test(; coverage=true)'
+      - name: Add coverage report to documentation
+        run: julia --startup-file=no scripts/coverage.jl . docs/build/coverage
+      - name: Preserve built documentation
+        uses: actions/upload-artifact@v7
         with:
           name: documentation
           path: docs/build/
           if-no-files-found: error
           retention-days: 30
+      - name: Configure GitHub Pages
+        if: >-
+          github.repository == '3142115360-web/AShareCostDistributions.jl' &&
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/configure-pages@v5
+      - name: Upload GitHub Pages artifact
+        if: >-
+          github.repository == '3142115360-web/AShareCostDistributions.jl' &&
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/build/
+
+  deploy:
+    if: >-
+      github.repository == '3142115360-web/AShareCostDistributions.jl' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy documentation
+        id: deployment
+        uses: actions/deploy-pages@v4

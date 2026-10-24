@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0
 
 - Cost histograms with uniform, triangular and empirical trading models.
 - Linear/exponential replacement, explicit initial state, chronological history.
@@ -8,8 +8,8 @@
 - Histogram mean, profit CDF, inverse CDF and equal-tail concentration.
 - Synthetic analytical/regression tests, documentation and CI workflows.
 
-Not yet registered. Proprietary terminal parity, broader real-market validation
-and corporate-action validation remain future work; no trading signals are included.
+Proprietary-terminal parity, broader real-market validation, and corporate-action validation remain
+future work; no trading signals are included.
 
 ### Continued release preparation
 
@@ -18,7 +18,7 @@ and corporate-action validation remain future work; no trading signals are inclu
 - CDF/Wasserstein/quantile/profit comparisons across different grids.
 - Grid sensitivity experiments and a configurable daily-result CSV example.
 - Lower triangular-model allocations and reproducible synthetic benchmarks.
-- Aqua checks in the package test target; official AutoMerge name checks recorded.
+- Aqua checks in the package test target; official AutoMerge name checks for the current package name.
 
 ### Reference workflow and numerical boundary review
 

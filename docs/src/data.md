@@ -1,9 +1,9 @@
-# 日期序列与数据导入
+# Dated series and data import
 
-`BarSeries` 将单只证券的观测日期、日线和研究口径保存在一起。价格基准与换手率分母必须显式填写；这些标签记录调用者的声明，本包无法验证供应商是否真的采用了该口径。
+`BarSeries` stores observation dates, daily bars and research assumptions for one security. The price basis and turnover denominator must be supplied explicitly. These labels record the caller's declarations; the package cannot verify a provider's actual conventions.
 
 ```julia
-using AShareChips, Dates
+using AShareCostDistributions, Dates
 
 bars = [DailyBar(low=9, high=11, close=10, turnover=0.05),
         DailyBar(low=9.5, high=12, close=11, turnover=0.12)]
@@ -17,32 +17,32 @@ chips = chip_distribution(series; grid)
 @assert probabilities(chips) ≈ probabilities(history[end].distribution)
 ```
 
-上述日期、价格和证券代码都是合成示例，不代表真实行情。
+All dates, prices and security identifiers above are synthetic.
 
-## 明确价格与换手口径
+## Price and turnover conventions
 
-| 参数 | 可用值 | 声明的含义 |
+| Parameter | Value | Declared meaning |
 |---|---|---|
-| `price_basis` | `:unadjusted` | 每个观测日当时的未复权价格；事件日可显式映射此前成本 |
-| `price_basis` | `:fixed_adjusted` | 全部历史价格已经处于同一个固定复权坐标基准 |
-| `turnover_basis` | `:float_shares` | 流通股作为换手分母 |
-| `turnover_basis` | `:free_float_shares` | 自由流通股作为换手分母 |
-| `turnover_basis` | `:total_shares` | 总股本作为换手分母 |
-| `turnover_basis` | `:provider_reported` | 使用供应商报告的换手率，分母尚未独立核实；不等同于前三种口径 |
+| `price_basis` | `:unadjusted` | Contemporaneous unadjusted prices; earlier costs can be explicitly mapped on event days |
+| `price_basis` | `:fixed_adjusted` | All historical prices already share one fixed adjusted coordinate basis |
+| `turnover_basis` | `:float_shares` | Tradable float is the turnover denominator |
+| `turnover_basis` | `:free_float_shares` | Free float is the turnover denominator |
+| `turnover_basis` | `:total_shares` | Total shares are the turnover denominator |
+| `turnover_basis` | `:provider_reported` | Provider-reported turnover whose denominator has not been independently verified; does not assert any of the three definitions above |
 
-`DailyBar.turnover` 始终存储比例：`0.05` 表示 5%，允许大于 1。切换分母只更改元数据，不会重新计算换手率。请在上游根据证券、日期和供应商定义准备一致数据。
+`DailyBar.turnover` always stores a fraction: `0.05` means 5%, and values greater than 1 are allowed. Changing denominator metadata does not recalculate turnover. Prepare consistent inputs upstream using the security, date and provider's definitions.
 
-`:fixed_adjusted` 序列禁止任何非 identity `PriceAdjustment`，避免重复复权。默认 `adjustments=nothing` 或逐日 identity 调整均可。`initial` 必须已经与该序列的价格坐标一致；本包无法从概率分布自动判断该条件。固定复权基准若依赖未来公司行为，回测需另行评估前视问题。
+A `:fixed_adjusted` series rejects nonidentity `PriceAdjustment` values to prevent double adjustment. Both the default `adjustments=nothing` and per-day identity adjustments are accepted. `initial` must already share the series' price coordinates; a probability distribution alone cannot establish this. A fixed basis involving future corporate actions requires a separate look-ahead assessment in backtests.
 
-日期必须非空、与 bars 等长并严格递增，重复日期与乱序均拒绝。本包不自动排序、去重或填补交易日，也不推断停牌、交易日历和信息可用时间。`trade_dates` 返回副本。构造时复制输入的 dates/bars；内部字段视为只读。
+Dates must be nonempty, match the bars in length and increase strictly. Duplicates and unordered dates are rejected. No automatic sorting, deduplication, calendar filling, suspension inference or information-availability inference is performed. `trade_dates` returns a copy. Construction copies the date and bar inputs; internal fields are treated as read-only.
 
-`chip_distribution(series)` 仍返回末期 `ChipDistribution`；`chip_history(series)` 仍返回状态向量；`dated_history(series)` 返回 `(date=..., distribution=...)` 向量，每条对应当日观测更新后的状态。所有模型、初始分布和网格参数沿用原有 API。
+`chip_distribution(series)` returns the final `ChipDistribution`; `chip_history(series)` returns a vector of states. `dated_history(series)` returns `(date=..., distribution=...)` entries, each representing the state after that observation's update. Model, prior and grid parameters follow the same API as plain bar inputs.
 
-## 简单无引号分隔文件
+## Simple unquoted delimited files
 
-`read_bars` 是针对简单表格的最小适配器，使用标准库 `Dates`，不依赖外部数据服务或解析包。它不是通用 CSV 解析器：任何双引号都被拒绝，包括额外列中的引号。需要 CSV 引号、字段内分隔符、转义、跨行字段或复杂缺失类型时，请先在上游使用 CSV.jl 等完整解析器，再用 `DailyBar` 与 `BarSeries` 构造模型输入。
+`read_bars` is a minimal table adapter using the `Dates` standard library, with no external data service or parser dependency. It is not a general CSV parser: every double quote is rejected, including in extra columns. For quoted fields, embedded delimiters, escapes, multiline fields or complex missing-value types, use a full parser such as CSV.jl upstream, then construct `DailyBar` and `BarSeries` inputs.
 
-仓库的 `examples/fixtures/daily_synthetic.csv` 是以下格式；所有行都是合成数据。
+The repository's `examples/fixtures/daily_synthetic.csv` has this format. All rows are synthetic.
 
 ```text
 date,low,high,close,turnover,vwap,symbol
@@ -59,18 +59,18 @@ series = read_bars("examples/fixtures/daily_synthetic.csv";
 @assert series.bars[2].vwap === nothing
 ```
 
-`turnover_unit=:fraction` 是默认值，输入 `0.05` 为 5%；指定 `:percent` 后，输入 `5` 为 5%，适配器除以 100。适配器不猜测单位、不计算 VWAP、不从成交量与股本推算换手率，也不获取除权因子。
+The default `turnover_unit=:fraction` interprets `0.05` as 5%. With `:percent`, input `5` means 5% and is divided by 100. The adapter does not guess units, calculate VWAP, derive turnover from volume and share counts, or obtain adjustment factors.
 
-- 首个非空白物理行作为表头；前、中、后空白行忽略。异常信息中的行号仍按原文件物理行计算。
-- 接受 UTF-8 BOM（只在第一物理行开头）与 CRLF；表头和值两侧空白移除。
-- 表头名按大小写精确匹配，重复或空表头拒绝。每条非空数据行的列数必须与表头相同。
-- `date/low/high/close/turnover` 必填且不可为空。数值必须可转换为有限 `Float64`，再接受 `DailyBar` 的范围检查；日期必须完整且精确匹配指定的 `DateFormat`，例如默认 `yyyy-mm-dd` 拒绝 `2000-01` 与 `2000-1-3`。
-- `vwap` 与 `symbol` 列允许不存在。存在的空 VWAP 表示 `nothing`；存在的 symbol 列每行必须有非空且一致的证券代码。symbol 保留前导零与后缀，如 `000001`、`600000.SH`，不推断交易所。
-- 可另传 `symbol="..."`；文件里的证券代码须与它一致。拒绝同一文件混入多只证券。
-- 额外列忽略，但仍必须符合无引号格式与整行列数要求。文件至少包含一条观测。
-- 传入路径时，适配器管理打开与关闭；传入 IO 时会消费其内容，但成功和失败均不关闭调用者的 IO。
+- The first nonblank physical line is the header. Blank lines anywhere are ignored; error line numbers retain the original physical numbering.
+- UTF-8 BOM is accepted only at the start of the first physical line. CRLF is accepted. Leading and trailing whitespace is trimmed from headers and values.
+- Header names are case-sensitive; duplicate or empty names are rejected. Each nonblank data row must have the same number of columns as the header.
+- `date/low/high/close/turnover` are required and cannot be blank. Numbers must convert to finite `Float64` values and pass `DailyBar` range checks. Dates must match the declared `DateFormat` exactly and completely: the default `yyyy-mm-dd` rejects `2000-01` and `2000-1-3`.
+- `vwap` and `symbol` columns may be absent. A blank VWAP cell becomes `nothing`. When present, the symbol column must contain a nonempty, consistent identifier on every row. Leading zeroes and suffixes, such as `000001` and `600000.SH`, are retained; the exchange is not inferred.
+- A separate `symbol="..."` argument is allowed; identifiers in the file must match it. A file cannot mix securities.
+- Extra columns are ignored but must satisfy the unquoted format and row-width rules. At least one observation is required.
+- For a path, the adapter opens and closes the stream. For an IO object, it consumes the input but leaves the caller's stream open on both success and failure.
 
-## 自定义表头、日期与分隔符
+## Custom headers, dates and delimiters
 
 ```julia
 io = IOBuffer("day;L;H;C;T;Code\n03/01/2000;9;11;10;5;000001.SYNTHETIC\n")
@@ -80,6 +80,6 @@ series = read_bars(io; price_basis=:unadjusted, turnover_basis=:float_shares,
 @assert isopen(io)
 ```
 
-`columns` 使用 NamedTuple，将模型字段映射到原始表头名；必填字段必须映射，`vwap/symbol` 可省略或映射为 `nothing`。指定映射需互不重复，映射名可为字符串或 Symbol。`delimiter` 是单个字符，不能为双引号或换行。
+The `columns` NamedTuple maps model fields to input headers. Required fields must be mapped; `vwap/symbol` may be omitted or mapped to `nothing`. Mapped names must be distinct and may be strings or Symbols. `delimiter` must be a single character other than a double quote or newline.
 
-数据清洗、许可和调整因子的研究责任见 [数据与除权假设](assumptions.md)。真实行情与通达信等软件的对照仍需合法、口径明确且可审计的输入。
+See [Data and corporate-action assumptions](assumptions.md) for cleaning, licensing and factor responsibilities. Comparisons with real market data or Tongdaxin require legitimately obtained, auditable inputs with explicit conventions.

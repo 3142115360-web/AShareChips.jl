@@ -1,4 +1,4 @@
-using Test, AShareChips, TOML
+using Test, AShareCostDistributions, TOML
 isdefined(@__MODULE__, :analyze_csv) ||
     include(joinpath(@__DIR__, "..", "examples", "analyze_csv.jl"))
 

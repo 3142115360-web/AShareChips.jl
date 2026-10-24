@@ -1,4 +1,4 @@
-using AShareChips, Dates, TOML
+using AShareCostDistributions, Dates, TOML
 
 # Share the existing report publication helper without running its command line.
 if !isdefined(@__MODULE__, :_atomic_output)

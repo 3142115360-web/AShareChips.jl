@@ -1,9 +1,9 @@
-# 对照外部成本与获利指标
+# Comparing external cost and profit metrics
 
-有些数据只提供每日平均成本、几个成本分位点或某个价格下的获利比例。它们可以直接与模型比较，但不足以确定完整筹码分布。`compare_metrics` 接收这些标量，不补造直方图，不返回 Wasserstein 距离、全分布最大 CDF 误差或软件兼容性结论。
+Some sources provide only daily mean cost, a few cost quantiles or profit ratios at particular prices. These can be compared directly with the model, but cannot determine a full cost distribution. `compare_metrics` accepts such scalar references without inventing a histogram. It does not return Wasserstein distance, full-distribution maximum CDF error or a software-compatibility conclusion.
 
 ```julia
-using AShareChips
+using AShareCostDistributions
 
 estimate = ChipDistribution(PriceGrid([8, 10, 12]), [1, 1])
 comparison = compare_metrics(estimate; mean_cost=10.25,
@@ -14,19 +14,19 @@ comparison = compare_metrics(estimate; mean_cost=10.25,
 @assert comparison.profit_errors ≈ [0.1]
 ```
 
-所有误差都是模型估计减去参考值。成本与其误差使用价格单位；获利比例及其误差统一使用 0 到 1 的比例，`0.01` 的误差表示一个百分点。只比较明确传入的指标：缺少平均成本时，三个 `mean_cost_*` 返回值都是 `nothing`。分位点与成本、价格与获利比例须成对提供；每次调用至少提供一项指标。
+All errors are model estimate minus reference. Costs and cost errors use price units. Profit ratios and their errors use fractions from 0 to 1; an error of `0.01` is one percentage point. Only explicitly supplied metrics are compared. Without a mean reference, all three `mean_cost_*` results are `nothing`. Quantiles and costs, and evaluation prices and profit ratios, must be supplied in pairs. At least one metric is required.
 
-## 文件流程
+## File workflow
 
-运行仓库中的合成示例：
+Run the bundled synthetic example:
 
 ```sh
 julia --project=. examples/compare_metrics_csv.jl examples/metrics-analysis.toml
 ```
 
-`examples/fixtures/metrics_synthetic.csv` 中的日期、代码、价格、指标均为手工合成数据，`provenance` 列也标记了这一点。第一天的均值、中位数与价格 10 下获利比例可由对称三角分布手算；第二个参考日故意给出近似参考值，用于展示误差，而非宣称与任何软件一致。
+Dates, identifiers, prices and metrics in `examples/fixtures/metrics_synthetic.csv` are hand-constructed synthetic data, also identified by the `provenance` column. The first day's mean, median and profit ratio at price 10 can be derived by hand from a symmetric triangle. The second reference day deliberately provides approximate values to illustrate errors, without claiming agreement with any software.
 
-脚本使用与 `analyze_csv.jl` 相同的顶层行情设置、`grid` 网格、`model` 日内分布与换手设置，以及可选的 `events` 除权事件文件。它在完整输入行情上模拟一次；缺少参考的交易日仍参与历史筹码递推。参考设置如下：
+The script uses the same top-level market-data settings, `grid`, `model` daily/turnover settings and optional `events` file as `analyze_csv.jl`. It simulates the complete input history once; days without reference data still update the historical distribution. Reference settings are:
 
 ```toml
 [reference]
@@ -46,32 +46,32 @@ profit_ratio = "profit_fraction"
 # mean_cost = "weighted_mean"
 ```
 
-`date` 和 `symbol` 默认映射同名列；其他指标须明确映射，不根据列名猜测。`quantiles` 必须是互不重复的 0 到 1 分位数，与 `quantile_columns` 一一对应，保留配置顺序。均值、分位成本和文件中的评价价格必须是非负有限数，分位成本须随分位数非递减。每行允许个别指标单元格为空，但至少提供一项指标；获利价格与比例必须同时有值或同时为空。核心 `compare_metrics` API 也允许负的有限评价价格；这个 A 股文件流程采用更窄的非负价格要求。
+`date` and `symbol` default to same-named columns. Other metrics must be explicitly mapped; their meaning is not guessed from headers. `quantiles` must be unique values in 0 to 1, mapped one-to-one to `quantile_columns` in configuration order. Means, quantile costs and evaluation prices in the file must be finite and nonnegative; quantile costs must be nondecreasing with quantile level. Individual metric cells may be blank, but each row needs at least one metric. A profit price and ratio must either both be supplied or both be blank. The core `compare_metrics` API also accepts finite negative evaluation prices; this A-share file workflow applies the narrower nonnegative requirement.
 
-`profit_unit` 是必填的 `fraction` 或 `percent`，即使该文件只比较成本也需声明。比例输入的范围分别为 `[0,1]` 或 `[0,100]`；百分数只除以 100 一次。越界、非有限数、非零数转换为 `Float64` 后成为零，以及百分数转换时下溢都会拒绝。数据为 0.5 时它可能表示 50% 或 0.5%，仅凭值无法识别误声明；研究者须核查来源单位，脚本不猜测。
+`profit_unit` is required as `fraction` or `percent`, even for cost-only files. Valid ranges are `[0,1]` and `[0,100]` respectively; percentages are divided by 100 exactly once. Out-of-range values, nonfinite values, nonzero inputs that convert to Float64 zero, and underflow during percentage conversion are rejected. The value 0.5 could mean 50% or 0.5%; values alone cannot reveal a false unit declaration. Researchers must verify source units, since the script does not guess.
 
-日期默认严格匹配 `yyyy-mm-dd`；参考文件可以用 `reference.dateformat = "yyyymmdd"` 等显式格式。日期须严格递增，不允许重复、截断日期或自动排序。证券代码保留前导零和后缀；参考文件每行须提供非空一致代码，或通过 `reference.symbol` / 顶层 `symbol` 明确声明。行情与参考的代码必须均已知且一致。脚本不会依据行情证券自动给无代码、无声明的参考文件贴标签。
+Dates must exactly match `yyyy-mm-dd` by default. Explicit formats such as `reference.dateformat = "yyyymmdd"` are supported. Dates must increase strictly; duplicates, truncated dates and automatic sorting are not allowed. Security identifiers retain leading zeroes and suffixes. Each reference row must have a nonempty, consistent identifier, or one must be explicitly declared through `reference.symbol` or top-level `symbol`. Both market-data and reference identifiers must be known and match. The script does not silently label an anonymous, undeclared reference file with the market-data security.
 
-行情与参考必须声明相同的 `price_basis`。这只是必要条件；同名 `fixed_adjusted` 标签不保证两份数据使用同一复权基准，未复权序列也需要一致的公司行为处理。事件文件沿用 [除权事件文件](adjustments.md) 的先调整后换手规则；固定复权行情拒绝再次应用非恒等映射。日终参考指标可能晚于收盘才可用，比较日期不等于回测中可用的时间。
+Market data and references must declare the same `price_basis`. This is necessary but insufficient: identical `fixed_adjusted` labels do not prove identical adjustment coordinates, and unadjusted data still require consistent corporate-action treatment. Event files follow the adjustment-before-turnover rule described in [Adjustment events](adjustments.md); fixed-adjusted bars reject nonidentity mappings. End-of-day reference metrics may become available after the close, so a comparison date does not establish backtest availability time.
 
-`matching = "strict"` 要求两份日期完全一致；`intersection` 只输出共同日期。程序返回值与控制台分别报告行情有而参考无的日期 `estimate_only_dates`、参考有而行情无的日期 `reference_only_dates`。不补数据、不截去递推历史；没有共同日期会报错。未匹配的参考行也会完成证券、单位、日期、数值和分位成本顺序验证，不能借由日期过滤绕过错误。
+`matching = "strict"` requires identical dates. `intersection` outputs only common dates. The return value and console report `estimate_only_dates` and `reference_only_dates` for the unmatched dates on either side. No observations are fabricated and no recurrence history is removed. No common dates is an error. Even unmatched reference rows are validated for security, units, dates, numbers and quantile ordering; filtering dates cannot bypass invalid input.
 
-参考输入是简单无引号 UTF-8 CSV：接受首行 BOM、CRLF、空白行及单元格两端空白，拒绝空或重复表头、不同列数、无效 UTF-8 和任意列中的双引号。额外列可保存数据来源哈希等记录，解析时忽略。复杂 CSV 应先由完整解析器转换；脚本不联网获取数据。
+Reference input is simple unquoted UTF-8 CSV. A first-line BOM, CRLF, blank lines and surrounding cell whitespace are accepted. Empty or duplicate headers, inconsistent column counts, invalid UTF-8 and double quotes in any column are rejected. Extra columns may retain provenance hashes or other records and are ignored by the parser. Convert complex CSV upstream with a full parser. The script does not retrieve data online.
 
-输出长表表头为：
+The long-form output header is:
 
 ```text
 date,symbol,metric,quantile,price,estimate,reference,error
 ```
 
-`metric` 是 `mean_cost`、`cost_quantile` 或 `profit_ratio`；不适用的 `quantile` / `price` 留空。所有输入、配置和结果先验证再发布报告；已有文件、目录或链接均不会覆盖。返回值还包含 `output` 和逐指标的 `rows`，便于程序进一步分析。
+`metric` is `mean_cost`, `cost_quantile` or `profit_ratio`; inapplicable `quantile` and `price` cells are blank. All inputs, configuration and results are validated before publishing the report. Existing files, directories and links are never overwritten. The return value also includes `output` and per-metric `rows` for further analysis.
 
-## 上游字段需要按定义映射
+## Map upstream fields by definition
 
-[Tushare `cyq_perf` 官方文档](https://tushare.pro/document/2?doc_id=293) 将 `cost_5pct`、`cost_15pct`、`cost_50pct`、`cost_85pct`、`cost_95pct` 列为相应分位成本，将 `weight_avg` 列为加权平均成本。这些字段分别映射到分位数 `0.05/0.15/0.5/0.85/0.95` 和可选 `mean_cost`。证券可映射 `ts_code`，日期可映射 `trade_date` 并声明 `yyyymmdd`。`winner_rate` 还必须配上实际评价价格，先核查其单位、价格基准和更新时间再导入；脚本不自动认定评价价格等于任何文件的收盘价。
+The [official Tushare `cyq_perf` documentation](https://tushare.pro/document/2?doc_id=293) identifies `cost_5pct`, `cost_15pct`, `cost_50pct`, `cost_85pct` and `cost_95pct` as corresponding quantile costs, and `weight_avg` as weighted mean cost. Map them to quantiles `0.05/0.15/0.5/0.85/0.95` and optional `mean_cost` respectively. Map `ts_code` as the security and `trade_date` as the date, declaring `yyyymmdd`. `winner_rate` also needs its actual evaluation price. Verify its unit, price basis and update timing first; the script never assumes that its evaluation price equals a particular file's close.
 
-[AKShare `stock_cyq_em` 实现](https://github.com/akfamily/akshare/blob/fe10d1decb705e5f43cc8ca3339ca39e580fb8f4/akshare/stock_feature/stock_cyq_em.py) 当前将 `avgCost` 计算为累计筹码 50% 对应的离散成本，然后输出名为“平均成本”的列。这里应将它映射为 `quantiles = [0.5]` 的参考成本，不能映射到本包的均值。其 `benefitPart` 是指定收盘价下的比例；导入时仍需同时提供该价格。源码版本、窗口、网格、舍入和边界处理应与实验记录一起保存，不能仅凭字段名认定同口径。
+In the [pinned AKShare `stock_cyq_em` implementation](https://github.com/akfamily/akshare/blob/fe10d1decb705e5f43cc8ca3339ca39e580fb8f4/akshare/stock_feature/stock_cyq_em.py), `avgCost` is calculated as the discrete cost at 50% cumulative mass, then exposed under a column labelled “average cost.” Map it as a `quantiles = [0.5]` reference, not as this package's mean. Its `benefitPart` is a fraction evaluated at the specified close; provide that price alongside it. Preserve the source version, window, grid, rounding and boundary conventions with the experiment. A field name alone does not establish matching definitions.
 
-上述映射依据公开文档和公开实现，不构成通达信内部算法说明。真实实验应另外记录原始来源、获取时间、文件哈希、参数、覆盖期间、初始化、除权与偏差；数值接近不等于真实账户持仓或软件精确复现。
+These mappings rely on public documentation and implementation, not Tongdaxin's private algorithm. Real experiments should also record original sources, retrieval times, file hashes, parameters, coverage, initialization, adjustments and discrepancies. Numerical proximity does not prove actual account holdings or exact software reproduction.
 
-本轮真实日行情上的独立算法实验见[对照报告](market_validation.md)。
+See the [real daily-bar comparison report](market_validation.md) for the completed independent algorithm experiment.

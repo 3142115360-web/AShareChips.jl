@@ -1,13 +1,13 @@
-# 计算性能
+# Performance
 
-本仓库提供可重跑的合成工作负载；它衡量计算时间与分配量，不衡量投资效果，也不代表所有数据规模。
+The repository includes a reproducible synthetic workload. It measures runtime and allocations, not investment performance, and does not represent every data scale.
 
 ```sh
 julia --startup-file=no --project=. benchmarks/runbenchmarks.jl
 ```
 
-脚本先编译相同调用，再执行五次并报告最快一次的时间、分配字节和垃圾回收时间。输入为 1,000 个合成日观测、600 个价格 bin；分别计算均匀/三角模型、最终状态/完整历史。数据生成、编译和文件下载不在记录时间内，垃圾回收时间包含在单次记录里。并发进程、CPU 状态和 Julia 版本都可能影响结果。
+The script compiles each call first, then runs it five times and reports the fastest elapsed time, allocated bytes, and garbage-collection time. Its synthetic input contains 1,000 daily observations and 600 price bins. It exercises uniform and triangular daily models for both a final distribution and full history. Data generation, compilation, and downloads are outside the measured region; garbage collection during a run remains included.
 
-当前三角模型避免在密度闭包中反复赋值捕获变量，消除了不必要的装箱和按价格点的临时对象；模拟也避免为默认模型与默认调整创建逐日列表，并复用普通输入向量。历史状态仍独立保存，不修改调用者输入。
+The implementation avoids boxed captured variables in the triangular density calculation and does not construct per-day model or adjustment lists for default inputs. It reuses ordinary input vectors without modifying them. Historical snapshots remain independent objects.
 
-此次实际结果、环境和前后比较见包根目录的开发报告与验证日志。v0.1 仍会为每日概率和更新状态分配数组，没有零分配、GPU、任意精度或批量多证券性能承诺。
+Version 0.1 still allocates probability and state arrays for daily updates. It makes no zero-allocation, GPU, arbitrary-precision, or multi-security batch-performance commitment. Benchmark results depend on Julia version, hardware, concurrent load, and garbage-collector state, so record that environment with any reported number.

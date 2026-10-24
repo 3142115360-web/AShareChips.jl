@@ -1,22 +1,22 @@
 using Test
-using AShareChips
+using AShareCostDistributions
 using Aqua
 
 # A user's extensions rely only on the two documented dispatch hooks.
 struct TestFixedDailyModel <: AbstractDailyModel end
-AShareChips.daily_distribution(::TestFixedDailyModel, grid::PriceGrid, ::DailyBar) =
+AShareCostDistributions.daily_distribution(::TestFixedDailyModel, grid::PriceGrid, ::DailyBar) =
     ChipDistribution(grid, [0, 1])
 struct TestHalfTurnover <: AbstractTurnoverModel end
-AShareChips.effective_turnover(::TestHalfTurnover, ::Real) = 0.5
+AShareCostDistributions.effective_turnover(::TestHalfTurnover, ::Real) = 0.5
 struct TestWrongGridDailyModel <: AbstractDailyModel end
-AShareChips.daily_distribution(::TestWrongGridDailyModel, ::PriceGrid, ::DailyBar) =
+AShareCostDistributions.daily_distribution(::TestWrongGridDailyModel, ::PriceGrid, ::DailyBar) =
     ChipDistribution(PriceGrid([8, 9, 12]), [0, 1])
 struct TestInvalidTurnover <: AbstractTurnoverModel
     value::Float64
 end
-AShareChips.effective_turnover(model::TestInvalidTurnover, ::Real) = model.value
+AShareCostDistributions.effective_turnover(model::TestInvalidTurnover, ::Real) = model.value
 
-@testset "AShareChips" begin
+@testset "AShareCostDistributions" begin
     @testset "Validated grids, normalized masses, and owned snapshots" begin
         edges = [8.0, 10.0, 12.0, 14.0]
         grid = PriceGrid(edges)
@@ -391,5 +391,5 @@ include("metric_cli.jl")
 include("review_regressions.jl")
 
 @testset "Aqua package quality" begin
-    Aqua.test_all(AShareChips; undocumented_names=true)
+    Aqua.test_all(AShareCostDistributions; undocumented_names=true)
 end

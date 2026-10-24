@@ -1,7 +1,27 @@
 # Local quality and name checks
 
+Internal registration-quality notes. This record is not part of the user documentation.
+
+## Renamed-package preflight (2026-10-24)
+
+`AShareCostDistributions` passed AutoMerge 1.1.1's identifier,
+capitalization, length, ASCII, Julia-name, exact-name, and default distance
+checks against General registry tree
+`5a199e4cf222234ad406c0cbd714f1529e3f5ffb`. The registry snapshot contained
+14,541 package names including JLL packages and 12,703 excluding them. There
+was no case-insensitive exact collision and no package within the visual
+distance gate. The closest case-sensitive name was
+`PhaseTypeDistributions` at Damerau-Levenshtein distance 7.
+
+The checks used Julia 1.10.12, RegistryCI 11.0.0, AutoMerge 1.1.1,
+RegistryInstances 0.1.0, VisualStringDistances 0.1.1, and StringDistances
+0.11.3. They are a reproducible preflight, not a reservation of the name or a
+substitute for the checks run on the registration pull request.
+
+## Former-name evidence
+
 The Aqua checks and initial name checks below retain their dated evidence;
-the latest release-preparation name check is recorded separately at the end.
+the renamed-package preflight above records the current name check.
 They do not establish
 General approval, remote CI success, or agreement with a market-data provider
 or trading application.

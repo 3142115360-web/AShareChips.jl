@@ -1,48 +1,46 @@
-# 真实日行情上的独立模型对照
+# Independent comparison on public daily-market data
 
-实验日期：2026-10-17（Asia/Shanghai）。这是一次真实日行情上的研究模型对照，参考是固定版本公开算法的计算结果，没有完成通达信客户端验收，也没有真实账户持仓数据。
+This experiment was run on 2026-10-17 (Asia/Shanghai). It compares two research models on real daily bars. It is not a validation against Tongdaxin, and no account-level holding data were available.
 
-## 输入与来源
+## Input and provenance
 
-通过一次正常公开请求读取东财 000001.SZ 的 2024 年原始日 K，接口实际返回 242 日；明确选择末 210 日（2024-02-23 至 2024-12-31）作为双方输入。参考实现使用 [AKShare 固定提交 fe10d1d](https://github.com/akfamily/akshare/blob/fe10d1decb705e5f43cc8ca3339ca39e580fb8f4/akshare/stock_feature/stock_cyq_em.py) 中的原样 JavaScript 计算器，在本地计算末 90 日（2024-08-19 至 2024-12-31）的五个成本分位数和获利比例。没有调用带个人令牌或付费权限的接口。
+A public Eastmoney request returned 242 unadjusted daily bars for `000001.SZ` in 2024. Both models received the final 210 observations, from 2024-02-23 through 2024-12-31. The reference was the JavaScript calculator in the pinned [AKShare implementation](https://github.com/akfamily/akshare/blob/fe10d1decb705e5f43cc8ca3339ca39e580fb8f4/akshare/stock_feature/stock_cyq_em.py). It produced five cost quantiles and a profitable-holder fraction for the final 90 dates, from 2024-08-19 through 2024-12-31.
 
-日 K 字段的来源说明见 [AKShare 日行情文档](https://akshare.akfamily.xyz/data/stock/stock.html) 与 [固定版本读取实现](https://github.com/akfamily/akshare/blob/fe10d1decb705e5f43cc8ca3339ca39e580fb8f4/akshare/stock_feature/stock_hist_em.py)。交易量单位为手、成交额为元、换手率为百分数。本实验不使用交易量和成交额计算虚构 VWAP。换手分母未独立核实，明确声明 `turnover_basis=:provider_reported`，没有冒认流通股或自由流通股口径。
+The daily-field definitions are documented by [AKShare](https://akshare.akfamily.xyz/data/stock/stock.html), and the reader implementation was pinned at the same [source revision](https://github.com/akfamily/akshare/blob/fe10d1decb705e5f43cc8ca3339ca39e580fb8f4/akshare/stock_feature/stock_hist_em.py). Volume is reported in lots, amount in yuan, and turnover in percent. This experiment did not derive a synthetic VWAP from volume and amount. Because the turnover denominator was not independently verified, it was recorded as `turnover_basis=:provider_reported`.
 
-两边均使用未复权价格，未应用任何公司行为事件。样本可能包含分红等事件，因此本实验没有验证除权后持仓成本。价格范围为实验样本确定，仅用于描述性对照，没有交易策略或回测可得时间结论。
+Both sides used unadjusted prices and no corporate-action events. The sample may include dividend events, so the experiment does not validate cross-event cost accounting. Raw market data and per-date reference output are not redistributed because their redistribution terms were not established; the package and test fixtures contain only synthetic data.
 
-原始行情和逐日供应商模型结果的再分发许可尚未确定，未放入包、测试 fixture 或公开仓库。原始响应、参数、获取时间、选样步骤、源代码许可和文件摘要保存在私有工作记录；这里公开研究方法与误差汇总。包内仍仅有合成样例。
+## Deliberately different model definitions
 
-## 明确不同的计算口径
+AShareCostDistributions used its default triangular peak `(low+high+close)/3`, `LinearTurnover(k=1)`, a full first-day seed, and a fixed equal-width histogram. The 120 dates before the comparison window still contributed to its recurrence.
 
-本包使用默认三角峰 `(low+high+close)/3`、`LinearTurnover(k=1)`、首日完整分布初始化及固定等宽直方图。没有参考的前 120 日仍全部参与递推。
+The pinned reference uses the four-price OHLC average as its peak, recomputes the historical price range for every date, uses 150 discrete points with a minimum one-cent interval, rounds displayed values to cents, and starts with no historical mass. Its field named `avgCost` is the discrete cost at cumulative mass 50%, so it was compared with `Q(0.5)`, not with this package's mathematical mean.
 
-公开参考源码使用 OHLC 四价平均作峰值，重算每个日期的历史价格范围，150 个离散点、至少一分价格间隔和到分显示舍入；历史筹码从空质量起步。该固定源码中的 120 日范围赋值只存在于注释，本实验没有额外启用它。`avgCost` 实际按累计质量 50% 找成本，因此只映射为中位成本 Q(.5)，没有用它替代本包的数学平均成本。
+Initialization, peak, grid, and CDF-boundary rules therefore differ. The experiment measures their combined result; it does not attribute the difference to one component.
 
-两者的初始化、峰值、网格和离散/连续 CDF 边界均不同。这些已知差异使数值不一致有解释空间，但本实验没有逐项分解它们的因果贡献。
+## Results
 
-## 实际结果
+All 210 daily bars entered the simulation. Ninety dates had reference values, producing 540 scalar comparisons. Errors are estimate minus reference. With a 0.01-yuan grid:
 
-210 个行情日参与模拟，90 个日期有参考，共输出 540 条指标比较；120 个行情日期缺参考，参考侧无缺失行情日期。误差方向为本包估计减去参考。固定网格步长 0.01 元时：
-
-| 指标 | 平均绝对误差 | 最大绝对误差 |
+| Metric | Mean absolute error | Maximum absolute error |
 |:---|---:|---:|
-| Q(0.05) 成本 | 0.047842 元 | 0.065451 元 |
-| Q(0.15) 成本 | 0.102102 元 | 0.133089 元 |
-| Q(0.5) 成本 | 0.311007 元 | 0.503976 元 |
-| Q(0.85) 成本 | 0.118015 元 | 0.443710 元 |
-| Q(0.95) 成本 | 0.098673 元 | 0.333149 元 |
-| 当日收盘价下获利比例 | 7.4154 个百分点 | 23.6430 个百分点 |
+| Q(0.05) cost | CNY 0.047842 | CNY 0.065451 |
+| Q(0.15) cost | CNY 0.102102 | CNY 0.133089 |
+| Q(0.50) cost | CNY 0.311007 | CNY 0.503976 |
+| Q(0.85) cost | CNY 0.118015 | CNY 0.443710 |
+| Q(0.95) cost | CNY 0.098673 | CNY 0.333149 |
+| Profit fraction at the daily close | 7.4154 percentage points | 23.6430 percentage points |
 
-这是一组不同模型间的偏差，不是对真实持仓误差的测量；没有人为设定“兼容通过”阈值。稀疏指标不确定完整分布，因此没有报告参考全 CDF 误差或 Wasserstein 距离。
+These are differences between two estimated models, not errors relative to true holdings. No compatibility threshold was chosen. Sparse scalar metrics do not determine a full distribution, so full-CDF and Wasserstein errors are not reported.
 
-## 网格敏感性
+## Grid sensitivity
 
-| 本包网格步长 | Q(.5) 平均绝对误差（元） | 获利比例平均绝对误差（百分点） |
+| Grid step | Q(0.50) mean absolute error | Profit-fraction mean absolute error |
 |:---|---:|---:|
-| 0.1 元 | 0.305801 | 7.3834 |
-| 0.02 元 | 0.310826 | 7.4138 |
-| 0.01 元 | 0.311007 | 7.4154 |
+| CNY 0.10 | CNY 0.305801 | 7.3834 percentage points |
+| CNY 0.02 | CNY 0.310826 | 7.4138 percentage points |
+| CNY 0.01 | CNY 0.311007 | 7.4154 percentage points |
 
-0.02 与 0.01 元网格的汇总差异很小，仍存在约 0.31 元的中位成本偏差及约 7.42 个百分点的获利比例偏差。因此这个样本没有支持“仅细化网格就能复现参考”的结论。未来需用控制实验分开检查初始化、日内峰值与离散规则，并取得有许可、明确版本和导出口径的通达信样本。
+The 0.02- and 0.01-yuan summaries are close, while a material model difference remains. This sample does not support the claim that grid refinement alone reproduces the reference. Controlled experiments would be needed to isolate initialization, daily peak, and discretization effects, followed by a licensed, versioned Tongdaxin export for any terminal-specific validation.
 
-[摘要接口与文件配置](metric_comparison.md)可接收合法取得的成本与获利指标；测试中的解析答案与真实对照分别验证数值合同和不同算法的实际偏差。它们都不能代替维护者人工审核或证明交易有效性。
+The [metric comparison workflow](metric_comparison.md) accepts legally obtained cost and profit summaries. Its analytical fixtures test the numerical contract; this experiment demonstrates actual differences between two public model definitions. Neither establishes trading effectiveness.

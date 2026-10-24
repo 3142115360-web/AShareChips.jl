@@ -1,6 +1,6 @@
-name = "AShareChips"
+name = "AShareCostDistributions"
 uuid = "9e860214-f2ad-4555-bfb7-966779f9bcb1"
-authors = ["AShareChips.jl contributors"]
+authors = ["Zhao.Ruihong"]
 version = "0.1.0"
 
 [deps]

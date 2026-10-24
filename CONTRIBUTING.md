@@ -17,4 +17,4 @@ turnover models return a finite replacement fraction in [0,1].
 
 Disclose significant AI contributions. A human maintainer must review and
 understand all contributed code before General registration. Track release
-work in `DEVELOPMENT_REPORT.md` and `docs/src/registration.md`.
+work in `internal/DEVELOPMENT_REPORT.md` and `internal/registration.md`.

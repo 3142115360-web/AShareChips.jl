@@ -14,7 +14,7 @@ the table receive `PriceAdjustment()` (`scale=1`, `shift=0`). Events are aligned
 by exact observation date, rather than row number.
 
 ```julia
-using AShareChips
+using AShareCostDistributions
 
 series = read_bars("daily.csv";
     price_basis=:unadjusted, turnover_basis=:float_shares,
